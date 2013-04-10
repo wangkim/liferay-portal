@@ -44,6 +44,7 @@ import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.documentlibrary.NoSuchFolderException;
 import com.liferay.portlet.documentlibrary.RepositoryNameException;
 import com.liferay.portlet.documentlibrary.model.DLFolder;
+import com.liferay.portlet.expando.model.ExpandoTableConstants;
 
 import java.util.Date;
 import java.util.List;
@@ -157,8 +158,9 @@ public class RepositoryLocalServiceImpl extends RepositoryLocalServiceBaseImpl {
 			repositoryId);
 
 		if (repository != null) {
-			expandoValueLocalService.deleteValues(
-				Repository.class.getName(), repositoryId);
+			expandoRowLocalService.deleteRow(
+				repository.getCompanyId(), Repository.class.getName(),
+				ExpandoTableConstants.DEFAULT_TABLE_NAME, repositoryId);
 
 			try {
 				dlFolderLocalService.deleteFolder(repository.getDlFolderId());
