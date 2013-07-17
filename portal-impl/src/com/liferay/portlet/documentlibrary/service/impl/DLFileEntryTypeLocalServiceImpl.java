@@ -488,28 +488,32 @@ public class DLFileEntryTypeLocalServiceImpl
 		List<DLFileEntry> dlFileEntries = dlFileEntryPersistence.findByG_F(
 			groupId, folderId);
 
-		for (DLFileEntry dlFileEntry : dlFileEntries) {
-			Long fileEntryTypeId = dlFileEntry.getFileEntryTypeId();
+		if (defaultFileEntryTypeId !=
+			DLFileEntryTypeConstants.FILE_ENTRY_TYPE_ID_BASIC_DOCUMENT) {
 
-			if (fileEntryTypeIds.contains(fileEntryTypeId)) {
-				continue;
+			for (DLFileEntry dlFileEntry : dlFileEntries) {
+				Long fileEntryTypeId = dlFileEntry.getFileEntryTypeId();
+
+				if (fileEntryTypeIds.contains(fileEntryTypeId)) {
+					continue;
+				}
+
+				DLFileVersion dlFileVersion =
+					dlFileVersionLocalService.getLatestFileVersion(
+						dlFileEntry.getFileEntryId(), true);
+
+				if (dlFileVersion.isPending()) {
+					workflowInstanceLinkLocalService.deleteWorkflowInstanceLink(
+						dlFileVersion.getCompanyId(), groupId,
+						DLFileEntry.class.getName(),
+						dlFileVersion.getFileVersionId());
+				}
+
+				dlFileEntryService.updateFileEntry(
+					dlFileEntry.getFileEntryId(), null, null, null, null, null,
+					false, defaultFileEntryTypeId, null, null, null, 0,
+					serviceContext);
 			}
-
-			DLFileVersion dlFileVersion =
-				dlFileVersionLocalService.getLatestFileVersion(
-					dlFileEntry.getFileEntryId(), true);
-
-			if (dlFileVersion.isPending()) {
-				workflowInstanceLinkLocalService.deleteWorkflowInstanceLink(
-					dlFileVersion.getCompanyId(), groupId,
-					DLFileEntry.class.getName(),
-					dlFileVersion.getFileVersionId());
-			}
-
-			dlFileEntryService.updateFileEntry(
-				dlFileEntry.getFileEntryId(), null, null, null, null, null,
-				false, defaultFileEntryTypeId, null, null, null, 0,
-				serviceContext);
 		}
 
 		List<DLFolder> subFolders = dlFolderPersistence.findByG_M_P_H(
