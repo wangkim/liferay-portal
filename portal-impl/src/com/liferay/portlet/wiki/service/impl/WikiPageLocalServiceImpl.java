@@ -1688,7 +1688,14 @@ public class WikiPageLocalServiceImpl extends WikiPageLocalServiceBaseImpl {
 		page.setSummary(summary);
 		page.setFormat(format);
 
+		List<WikiPage> versionPage = wikiPagePersistence.findByN_T(
+			nodeId, title);
+
 		if (Validator.isNotNull(parentTitle)) {
+			for(WikiPage curPage :versionPage) {
+				curPage.setParentTitle(parentTitle);
+			}
+
 			page.setParentTitle(parentTitle);
 		}
 
