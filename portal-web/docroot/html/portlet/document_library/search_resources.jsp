@@ -43,7 +43,11 @@ long[] folderIdsArray = null;
 Folder folder = null;
 
 if (searchFolderId > 0) {
-	folderIdsArray = new long[] {searchFolderId};
+	List<Long> folderIds = DLAppServiceUtil.getSubfolderIds(scopeGroupId, searchFolderId);
+
+	folderIds.add(0, searchFolderId);
+
+	folderIdsArray = StringUtil.split(StringUtil.merge(folderIds), 0L);
 
 	folder = DLAppServiceUtil.getFolder(searchFolderId);
 }
