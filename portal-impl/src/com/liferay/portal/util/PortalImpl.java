@@ -902,11 +902,17 @@ public class PortalImpl implements Portal {
 		String queryString = StringPool.BLANK;
 
 		if (Validator.isNull(friendlyURL)) {
-			layout = LayoutLocalServiceUtil.fetchFirstLayout(
+
+			// We need to ensure that virtual layouts are merged
+
+			List<Layout> layouts = LayoutLocalServiceUtil.getLayouts(
 				groupId, privateLayout,
 				LayoutConstants.DEFAULT_PARENT_LAYOUT_ID);
 
-			if (layout == null) {
+			if (!layouts.isEmpty()) {
+				layout = layouts.get(0);
+			}
+			else {
 				throw new NoSuchLayoutException(
 					"{groupId=" + groupId + ", privateLayout=" + privateLayout +
 						"}");
@@ -4504,6 +4510,14 @@ public class PortalImpl implements Portal {
 
 			if (group.isControlPanel()) {
 				long doAsGroupId = ParamUtil.getLong(request, "doAsGroupId");
+
+				if (doAsGroupId <= 0) {
+					HttpServletRequest originalRequest =
+						getOriginalServletRequest(request);
+
+					doAsGroupId = ParamUtil.getLong(
+						originalRequest, "doAsGroupId");
+				}
 
 				Group doAsGroup = GroupLocalServiceUtil.fetchGroup(doAsGroupId);
 

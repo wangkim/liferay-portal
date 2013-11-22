@@ -367,23 +367,35 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 		}
 	}
 
-	protected void deleteThumbnails(
+	protected void deleteThumbnail(
 		long companyId, long groupId, long fileEntryId, long fileVersionId,
-		String thumbnailType) {
+		String thumbnailType, int index) {
 
 		try {
-			String dirName = getPathSegment(
-				groupId, fileEntryId, fileVersionId, false);
-
-			if (fileVersionId > 0) {
-				dirName = dirName.concat(StringPool.PERIOD);
-				dirName = dirName.concat(thumbnailType);
-			}
+			String dirName = getThumbnailFilePath(
+				groupId, fileEntryId, fileVersionId, thumbnailType, index);
 
 			DLStoreUtil.deleteFile(companyId, REPOSITORY_ID, dirName);
 		}
 		catch (Exception e) {
 		}
+	}
+
+	protected void deleteThumbnails(
+		long companyId, long groupId, long fileEntryId, long fileVersionId,
+		String thumbnailType) {
+
+		deleteThumbnail(
+			companyId, groupId, fileEntryId, fileVersionId, thumbnailType,
+			THUMBNAIL_INDEX_DEFAULT);
+
+		deleteThumbnail(
+			companyId, groupId, fileEntryId, fileVersionId, thumbnailType,
+			THUMBNAIL_INDEX_CUSTOM_1);
+
+		deleteThumbnail(
+			companyId, groupId, fileEntryId, fileVersionId, thumbnailType,
+			THUMBNAIL_INDEX_CUSTOM_2);
 	}
 
 	protected void destroyProcess(String processIdentity) {
@@ -857,17 +869,28 @@ public abstract class DLPreviewableProcessor implements DLProcessor {
 	protected String getThumbnailFilePath(
 		FileVersion fileVersion, String type, int index) {
 
+		return getThumbnailFilePath(
+			fileVersion.getGroupId(), fileVersion.getFileEntryId(),
+			fileVersion.getFileVersionId(), type, index);
+	}
+
+	protected String getThumbnailFilePath(
+		long groupId, long fileEntryId, long fileVersionId,
+		String thumbnailType, int index) {
+
 		StringBundler sb = new StringBundler(5);
 
-		sb.append(getPathSegment(fileVersion, false));
+		sb.append(getPathSegment(groupId, fileEntryId, fileVersionId, false));
 
 		if (index != THUMBNAIL_INDEX_DEFAULT) {
 			sb.append(StringPool.DASH);
 			sb.append(index);
 		}
 
-		sb.append(StringPool.PERIOD);
-		sb.append(type);
+		if (fileVersionId > 0) {
+			sb.append(StringPool.PERIOD);
+			sb.append(thumbnailType);
+		}
 
 		return sb.toString();
 	}
